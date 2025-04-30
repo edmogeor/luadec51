@@ -5,6 +5,7 @@
 
 #include "lua.h"
 #include "lauxlib.h"
+#include "luadec.h"
 
 #include "lfunc.h"
 #include "lmem.h"
@@ -40,10 +41,6 @@ lua_State* glstate;
 static char Output[]={ OUTPUT };	/* default output file name */
 static const char* output=Output;	/* output file name */
 static const char* progname=PROGNAME;	/* actual program name */
-
-void luaU_decompile(const Proto * f, int lflag);
-void luaU_decompileFunctions(const Proto * f, int lflag, int functions);
-void luaU_disassemble(const Proto* f, int dflag, int functions, char* name);
 
 static void fatal(const char* message)
 {
@@ -341,74 +338,3 @@ static void strip(lua_State* L, Proto* f)
 }
 
 int luaU_guess_locals(Proto * f, int main);
-
-int main(int argc, char* argv[])
-{
-	int oargc;
-	char** oargv;
-	char tmp[256];
- lua_State* L;
- Proto* f;
- int i;
- oargc = argc;
- oargv = argv;
- LDS2 = NULL;
- i=doargs(argc,argv);
- argc-=i; argv+=i;
- if (argc<=0) usage("no input files given",NULL);
- L=lua_open();
- glstate = L;
- luaB_opentests(L);
- for (i=0; i<argc; i++)
- {
-  const char* filename=IS("-") ? NULL : argv[i];
-  if (luaL_loadfile(L,filename)!=0) fatal(lua_tostring(L,-1));
- }
- if (disassemble) {
-	 printf("; This file has been disassembled using luadec " VERSION " by sztupy (http://winmo.sztupy.hu)\n");
-   printf("; Command line was: ");
- } else {
-	 printf("-- Decompiled using luadec " VERSION " by sztupy (http://winmo.sztupy.hu)\n");
-	 printf("-- Command line was: ");
- }
- for (i=1; i<oargc; i++) {
-	 printf("%s ",oargv[i]);
- }
- printf("\n\n");
- f=combine(L,argc);
- if (guess_locals) {
-	 luaU_guess_locals(f,0);
- }
- if (lds2) {
-	int i,i2;
-	for (i=-1; i<f->sizep; i++) {
-		Proto * x = f;
-		if (i!=-1) {
-			x = f->p[i];
-		}
-		for (i2=0; i2<x->sizelocvars; i2++) {
-			if (i2!=0) printf(",");
-			printf("%d-%d",x->locvars[i2].startpc,x->locvars[i2].endpc);
-		}
-		printf(";");
-	}
-	return 0;
- }
- if (functions) {
-	 if (disassemble) {
-		 sprintf(tmp,"%d",functions);
-		 luaU_disassemble(f,debugging,functions,tmp);
-	 } else {
-		 luaU_decompileFunctions(f, debugging, functions);
-	 }
- }
- else {
-	 if (disassemble) {
-		 sprintf(tmp,"");
-		 luaU_disassemble(f,debugging,0,tmp);
-	 } else {
-		 luaU_decompile(f, debugging);
-	 }
- }
- return 0;
-}

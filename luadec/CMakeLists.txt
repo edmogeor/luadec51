@@ -13,3 +13,4 @@ target_sources(luadec PRIVATE
     structs.c
     structs.h)
 target_link_libraries(luadec PRIVATE lua)
+target_include_directories(luadec PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
