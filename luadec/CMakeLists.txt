@@ -1,4 +1,4 @@
-add_library(luadec STATIC)
+add_executable(luadec)
 target_sources(luadec PRIVATE
     guess.c
     ldprint.c
