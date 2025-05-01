@@ -56,7 +56,7 @@ void luaU_guess_locals(Proto * f, int main) {
 	struct llist *list_next = &list_begin;
 
   if (f->sizelocvars>0) {
-    return 0;
+    return;
   }
 
   list_begin.next = NULL;
