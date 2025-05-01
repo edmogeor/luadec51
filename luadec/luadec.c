@@ -340,7 +340,7 @@ static void strip(lua_State* L, Proto* f)
   for (i=0; i<n; i++) strip(L,f->p[i]);
 }
 
-int luaU_guess_locals(Proto * f, int main);
+void luaU_guess_locals(Proto * f, int main);
 
 int main(int argc, char* argv[])
 {

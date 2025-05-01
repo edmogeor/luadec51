@@ -44,7 +44,7 @@ struct llist * add(struct llist * list, int startpc, int endpc) {
 	return list->next;
 }
 
-int luaU_guess_locals(Proto * f, int main) {
+void luaU_guess_locals(Proto * f, int main) {
 	int blockend[255];
 	int block;
 	int regassign[MAXARG_A];
