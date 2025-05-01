@@ -14,4 +14,6 @@ target_sources(luadec PRIVATE
     structs.h)
 target_link_libraries(luadec PRIVATE lua)
 target_include_directories(luadec PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-set_property(luadec PROPERTY WIN32_EXECUTABLE FALSE)
+set_target_properties(luadec PROPERTIES
+        LINKER_LANGUAGE C
+        WIN32_EXECUTABLE FALSE)
