@@ -57,8 +57,8 @@ target_sources(lua PRIVATE
         print.c
 )
 target_include_directories(lua PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(lua PRIVATE ${MATH_LIBRARY})
 
 if (NOT WIN32)
+    target_link_libraries(lua PRIVATE ${MATH_LIBRARY})
     target_compile_definitions(lua PUBLIC LUA_USE_LINUX)
 endif()
