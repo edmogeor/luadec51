@@ -51,11 +51,11 @@ jobs:
         if [ -f luadec/luadec ]; then
           echo "Found luadec in subdirectory"
           file luadec/luadec
-          cp luadec/luadec luadec_x86_64
+          cp luadec/luadec ../luadec_x86_64
         elif [ -f luadec ]; then
           echo "Found luadec in root"
           file luadec
-          cp luadec luadec_x86_64
+          cp luadec ../luadec_x86_64
         else
           echo "Error: luadec binary not found"
           exit 1
@@ -79,11 +79,11 @@ jobs:
         if [ -f luadec/luadec ]; then
           echo "Found luadec in subdirectory"
           file luadec/luadec
-          cp luadec/luadec luadec_arm64
+          cp luadec/luadec ../luadec_arm64
         elif [ -f luadec ]; then
           echo "Found luadec in root"
           file luadec
-          cp luadec luadec_arm64
+          cp luadec ../luadec_arm64
         else
           echo "Error: luadec binary not found"
           exit 1
@@ -92,15 +92,15 @@ jobs:
     - name: Verify architectures
       run: |
         echo "x86_64 binary:"
-        file build-x86_64/luadec_x86_64
-        lipo -archs build-x86_64/luadec_x86_64
+        file luadec_x86_64
+        lipo -archs luadec_x86_64
         echo "ARM64 binary:"
-        file build-arm64/luadec_arm64
-        lipo -archs build-arm64/luadec_arm64
+        file luadec_arm64
+        lipo -archs luadec_arm64
         
     - name: Create universal binary
       run: |
-        lipo -create build-x86_64/luadec_x86_64 build-arm64/luadec_arm64 -output luadec_universal
+        lipo -create luadec_x86_64 luadec_arm64 -output luadec_universal
         echo "Universal binary:"
         file luadec_universal
         lipo -archs luadec_universal
