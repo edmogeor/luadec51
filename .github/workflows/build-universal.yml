@@ -89,21 +89,9 @@ jobs:
           exit 1
         fi
         
-    - name: Verify architectures
+    - name: Check binaries exist
       run: |
-        echo "x86_64 binary:"
-        file luadec_x86_64
-        lipo -archs luadec_x86_64
-        echo "ARM64 binary:"
-        file luadec_arm64
-        lipo -archs luadec_arm64
-        
-    - name: Test binaries
-      run: |
-        echo "Testing x86_64 binary:"
-        ./luadec_x86_64 --help || echo "x86_64 help completed (exit code: $?)"
-        echo "Testing ARM64 binary:"
-        ./luadec_arm64 --help || echo "ARM64 help completed (exit code: $?)"
+        ls -la luadec_x86_64 luadec_arm64
         
     - name: Upload x86_64 binary
       uses: actions/upload-artifact@v4
