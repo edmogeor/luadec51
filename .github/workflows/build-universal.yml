@@ -98,32 +98,46 @@ jobs:
         file luadec_arm64
         lipo -archs luadec_arm64
         
-    - name: Create universal binary
+    - name: Test binaries
       run: |
-        lipo -create luadec_x86_64 luadec_arm64 -output luadec_universal
-        echo "Universal binary:"
-        file luadec_universal
-        lipo -archs luadec_universal
+        echo "Testing x86_64 binary:"
+        ./luadec_x86_64 --help || echo "x86_64 help completed (exit code: $?)"
+        echo "Testing ARM64 binary:"
+        ./luadec_arm64 --help || echo "ARM64 help completed (exit code: $?)"
         
-    - name: Test universal binary
-      run: |
-        ./luadec_universal --help || echo "Help command completed (exit code: $?)"
-        
-    - name: Upload universal binary
+    - name: Upload x86_64 binary
       uses: actions/upload-artifact@v4
       with:
-        name: luadec51-universal-binary
-        path: luadec_universal
+        name: luadec51-x86_64
+        path: luadec_x86_64
+        retention-days: 30
+        
+    - name: Upload ARM64 binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: luadec51-arm64
+        path: luadec_arm64
         retention-days: 30
         
     - name: Create release on tag
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
-        files: luadec_universal
-        name: luadec51 Universal Binary ${{ github.ref_name }}
+        files: |
+          luadec_x86_64
+          luadec_arm64
+        name: luadec51 Architecture-Specific Binaries ${{ github.ref_name }}
         body: |
-          Universal binary for luadec51 that works on both Intel and Apple Silicon Macs.
+          Architecture-specific binaries for luadec51.
+          
+          ## Files
+          - `luadec_x86_64` - Intel x86_64 binary
+          - `luadec_arm64` - Apple Silicon ARM64 binary
+          
+          ## Create Universal Binary
+          ```bash
+          lipo -create luadec_x86_64 luadec_arm64 -output luadec_universal
+          ```
           
           ## Usage
           ```bash
@@ -131,7 +145,6 @@ jobs:
           ```
           
           ## Features
-          - Intel x86_64 and Apple Silicon ARM64 support
           - Lua 5.1.x decompilation
           - Built-in disassembler
       env:
