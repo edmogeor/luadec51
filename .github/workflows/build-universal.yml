@@ -43,8 +43,23 @@ jobs:
       run: |
         cd build-x86_64
         make
-        file luadec
-        mv luadec luadec_x86_64
+        echo "Contents of build-x86_64:"
+        find . -name "luadec" -type f
+        echo "Full directory listing:"
+        find . -type f -name "luadec*"
+        # The binary might be in a subdirectory like luadec/luadec
+        if [ -f luadec/luadec ]; then
+          echo "Found luadec in subdirectory"
+          file luadec/luadec
+          cp luadec/luadec luadec_x86_64
+        elif [ -f luadec ]; then
+          echo "Found luadec in root"
+          file luadec
+          cp luadec luadec_x86_64
+        else
+          echo "Error: luadec binary not found"
+          exit 1
+        fi
         
     - name: Configure CMake for ARM64
       run: |
@@ -56,8 +71,23 @@ jobs:
       run: |
         cd build-arm64
         make
-        file luadec
-        mv luadec luadec_arm64
+        echo "Contents of build-arm64:"
+        find . -name "luadec" -type f
+        echo "Full directory listing:"
+        find . -type f -name "luadec*"
+        # The binary might be in a subdirectory like luadec/luadec
+        if [ -f luadec/luadec ]; then
+          echo "Found luadec in subdirectory"
+          file luadec/luadec
+          cp luadec/luadec luadec_arm64
+        elif [ -f luadec ]; then
+          echo "Found luadec in root"
+          file luadec
+          cp luadec luadec_arm64
+        else
+          echo "Error: luadec binary not found"
+          exit 1
+        fi
         
     - name: Verify architectures
       run: |
