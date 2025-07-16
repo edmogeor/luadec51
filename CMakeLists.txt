@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.10)
 project(luadec51)
 
 if (NOT WIN32)
