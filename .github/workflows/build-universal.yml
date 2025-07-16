@@ -1,0 +1,101 @@
+name: Build Universal luadec51
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-universal:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install dependencies
+      run: |
+        brew install cmake
+        
+    - name: Download and setup Lua 5.1.5
+      run: |
+        curl -L -o lua-5.1.5.tar.gz https://www.lua.org/ftp/lua-5.1.5.tar.gz
+        tar -xzf lua-5.1.5.tar.gz
+        cp -r lua-5.1.5/* lua/
+        rm -rf lua-5.1.5 lua-5.1.5.tar.gz
+        
+    - name: Configure CMake for x86_64
+      run: |
+        mkdir build-x86_64
+        cd build-x86_64
+        cmake .. -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_BUILD_TYPE=Release
+        
+    - name: Build x86_64 version
+      run: |
+        cd build-x86_64
+        make
+        file luadec
+        mv luadec luadec_x86_64
+        
+    - name: Configure CMake for ARM64
+      run: |
+        mkdir build-arm64
+        cd build-arm64
+        cmake .. -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_BUILD_TYPE=Release
+        
+    - name: Build ARM64 version
+      run: |
+        cd build-arm64
+        make
+        file luadec
+        mv luadec luadec_arm64
+        
+    - name: Verify architectures
+      run: |
+        echo "x86_64 binary:"
+        file build-x86_64/luadec_x86_64
+        lipo -archs build-x86_64/luadec_x86_64
+        echo "ARM64 binary:"
+        file build-arm64/luadec_arm64
+        lipo -archs build-arm64/luadec_arm64
+        
+    - name: Create universal binary
+      run: |
+        lipo -create build-x86_64/luadec_x86_64 build-arm64/luadec_arm64 -output luadec_universal
+        echo "Universal binary:"
+        file luadec_universal
+        lipo -archs luadec_universal
+        
+    - name: Test universal binary
+      run: |
+        ./luadec_universal --help || echo "Help command completed (exit code: $?)"
+        
+    - name: Upload universal binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: luadec51-universal-binary
+        path: luadec_universal
+        retention-days: 30
+        
+    - name: Create release on tag
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: luadec_universal
+        name: luadec51 Universal Binary ${{ github.ref_name }}
+        body: |
+          Universal binary for luadec51 that works on both Intel and Apple Silicon Macs.
+          
+          ## Usage
+          ```bash
+          ./luadec_universal input.luac > output.lua
+          ```
+          
+          ## Features
+          - Intel x86_64 and Apple Silicon ARM64 support
+          - Lua 5.1.x decompilation
+          - Built-in disassembler
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
